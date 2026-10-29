@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="leaflet.css">
+<style>html,body,#map{height:100%;margin:0}#hint{position:absolute;z-index:1000;top:12px;left:50%;transform:translateX(-50%);background:#17332ce8;color:white;padding:8px 14px;border-radius:8px;font:13px Arial;pointer-events:none;max-width:55%;text-align:center}.tree-pin{width:16px;height:16px;border:2px solid #12552c;border-radius:50%;background:#39e66e;box-shadow:0 1px 5px #17332c88;cursor:grab}.leaflet-dragging .tree-pin{cursor:grabbing}.leaflet-control-layers{font:13px Arial}</style>
+</head><body><div id="map"></div><div id="hint">Shift + мышь: выбрать участок · дерево: перетащить · подробные слои: справа</div>
+<script src="leaflet.js"></script>
+<script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+<script>
+const map=L.map('map').setView([43.2389,76.8897],13);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap contributors'}).addTo(map);
+let selection=null, bridge=null, start=null, drawing=null;
+new QWebChannel(qt.webChannelTransport, channel=>{bridge=channel.objects.bridge;bridge.ready();});
+map.getContainer().addEventListener('mousedown', e=>{if(!e.shiftKey||e.button!==0)return;e.preventDefault();map.dragging.disable();start=map.mouseEventToLatLng(e);if(drawing)map.removeLayer(drawing);drawing=L.rectangle(L.latLngBounds(start,start),{color:'#f9c74f',weight:2,fillOpacity:.13}).addTo(map);});
+document.addEventListener('mousemove',e=>{if(!start)return;drawing.setBounds(L.latLngBounds(start,map.mouseEventToLatLng(e)));});
+document.addEventListener('mouseup',e=>{if(!start)return;const end=map.mouseEventToLatLng(e),b=L.latLngBounds(start,end);start=null;map.dragging.enable();if(selection)map.removeLayer(selection);selection=drawing;drawing=null;if(b.getSouthWest().distanceTo(b.getNorthEast())>30&&bridge)bridge.select_rectangle(b.getSouth(),b.getWest(),b.getNorth(),b.getEast());});
+window.focusArea=(lat,lon,radius)=>{const center=L.latLng(lat,lon);const north=L.latLng(lat+radius/111320,lon+radius/(111320*Math.max(.01,Math.cos(lat*Math.PI/180))));const bounds=L.latLngBounds([lat-(north.lat-lat),lon-(north.lng-lon)],north);if(selection)map.removeLayer(selection);selection=L.rectangle(bounds,{color:'#f9c74f',weight:2,fillOpacity:.13}).addTo(map);map.fitBounds(bounds,{padding:[25,25]});};
+window.focusCity=(lat,lon,zoom=13)=>map.setView([lat,lon],zoom);
+window.focusBounds=([south,west,north,east])=>map.fitBounds([[south,west],[north,east]],{padding:[35,35]});
+window.clearSelection=()=>{if(selection){map.removeLayer(selection);selection=null;}if(drawing){map.removeLayer(drawing);drawing=null;}};
+const colors={buildings:'#747b80',roads:'#43494e',footways:'#c49b6b',sidewalks:'#d19951',green:'#4f9e63',water:'#68bfea',trees:'#2f8f48',restricted:'#c84a62',attractors:'#e27f3f',free:'#eacb55'};
+const names={buildings:'Здания',roads:'Дороги и велодорожки',footways:'Пешеходные пути',sidewalks:'Тротуары по тегам',green:'Зелёные зоны',water:'Вода',trees:'Известные деревья и ряды',restricted:'Запретные зоны',attractors:'Точки притяжения',free:'Свободная геометрия'};
+let layerControl=null,osmLayers={},candidateLayer=L.layerGroup(),heatLayer=L.layerGroup(),afterLayer=L.layerGroup().addTo(map),afterMode=true,candidateData=[],selectedIds=[],heatModel={canopyRadius:7,shadeResponse:.15,weights:[1,1,1]};
+let candidatesTemporarilyShown=false;
+const treeIcon=L.divIcon({className:'',html:'<div class="tree-pin"></div>',iconSize:[20,20],iconAnchor:[10,10]});
+const distanceText=(value)=>value===null||value===undefined?'нет разметки':`${Number(value).toFixed(1)} м`;
+window.candidatePopup=(c,selected)=>{const x=c.context||{},w=heatModel.weights||[1,1,1],sum=w.reduce((a,b)=>a+b,0),score=sum>0?(w[0]*c.heat+w[1]*c.pedestrian+w[2]*c.green_deficit)/sum:0;
+ const gap=x.mapped_green_objects===0?'<br><i>Зелень не размечена в OSM: дефицит оценён нейтрально.</i>':'';
+ return `<b>Предварительная точка #${c.id}</b><br>Условная оценка: ${score.toFixed(2)}<br>Жара: ${c.heat.toFixed(2)} · Пешеходы: ${c.pedestrian.toFixed(2)} · Дефицит известной зелени: ${c.green_deficit.toFixed(2)}<br>До здания: ${distanceText(x.buildings_distance_m)} · дороги: ${distanceText(x.roads_distance_m)} · тротуара: ${distanceText(x.sidewalks_distance_m)}<br>До зелени: ${distanceText(x.green_distance_m)} · известного дерева: ${distanceText(x.trees_distance_m)} · воды: ${distanceText(x.water_distance_m)} · запрета: ${distanceText(x.restricted_distance_m)}${gap}<br><i>Нужна проверка земли, сетей и грунта.</i><br><button onclick="window.toggleCandidate(${c.id})">${selected?'Убрать дерево':'Добавить дерево'}</button>`;};
+window.clearAnalysis=()=>{for(const layer of Object.values(osmLayers))map.removeLayer(layer);osmLayers={};if(layerControl){map.removeControl(layerControl);layerControl=null;}map.removeLayer(candidateLayer);map.removeLayer(heatLayer);candidateLayer.clearLayers();heatLayer.clearLayers();afterLayer.clearLayers();candidateData=[];selectedIds=[];candidatesTemporarilyShown=false;};
+window.setLayers=(data)=>{for(const layer of Object.values(osmLayers))map.removeLayer(layer);osmLayers={};if(layerControl)map.removeControl(layerControl);
+ for(const [key,geo] of Object.entries(data)){const layer=L.geoJSON(geo,{style:()=>({color:colors[key]||'#888',weight:key==='roads'?1.5:key==='buildings'?.7:1,opacity:key==='buildings'?.55:.8,fillOpacity:key==='buildings'?.10:key==='green'?.28:key==='water'?.40:key==='free'?.12:.30}),pointToLayer:(f,ll)=>L.circleMarker(ll,{radius:key==='trees'?3:4,color:colors[key]||'#888',fillOpacity:.8})});osmLayers[key]=layer;if(['buildings','green','water','trees','restricted'].includes(key))layer.addTo(map);}
+ const overlays={};for(const [key,layer] of Object.entries(osmLayers))overlays[names[key]||key]=layer;overlays['Кандидаты']=candidateLayer;overlays['Тепловой индекс']=heatLayer;overlays['Рекомендации']=afterLayer;layerControl=L.control.layers(null,overlays,{collapsed:true}).addTo(map);
+};
+window.renderHeat=()=>{heatLayer.clearLayers();const chosen=candidateData.filter(c=>selectedIds.includes(c.id));for(const c of candidateData){let heat=c.heat;if(afterMode){let influence=0;for(const s of chosen)influence=Math.max(influence,Math.max(0,1-map.distance([c.lat,c.lon],[s.lat,s.lon])/heatModel.canopyRadius));heat*=1-heatModel.shadeResponse*influence;}const red=Math.round(255*heat),blue=Math.round(255*(1-heat));L.circle([c.lat,c.lon],{radius:24,color:'transparent',fillColor:`rgb(${red},60,${blue})`,fillOpacity:.20}).addTo(heatLayer);}};
+window.setCandidates=(data,ids,model)=>{candidateData=data;selectedIds=ids;heatModel=model||heatModel;candidateLayer.clearLayers();afterLayer.clearLayers();const selected=new Set(ids);
+ for(const c of data){L.circleMarker([c.lat,c.lon],{radius:3,color:'#d4ab2e',weight:1,fillOpacity:.65}).bindPopup(window.candidatePopup(c,false)).addTo(candidateLayer);
+ if(selected.has(c.id))L.marker([c.lat,c.lon],{icon:treeIcon,draggable:true,title:'Перетащить дерево к кандидату'}).bindPopup(window.candidatePopup(c,true)).on('dragstart',()=>{candidatesTemporarilyShown=!map.hasLayer(candidateLayer);if(candidatesTemporarilyShown)candidateLayer.addTo(map);}).on('dragend',event=>{const p=event.target.getLatLng();if(candidatesTemporarilyShown)map.removeLayer(candidateLayer);candidatesTemporarilyShown=false;if(bridge)bridge.move_candidate(c.id,p.lat,p.lng);}).addTo(afterLayer);
+ }window.renderHeat();if(!afterMode)map.removeLayer(afterLayer);};
+window.showAfter=(enabled)=>{afterMode=enabled;if(enabled)afterLayer.addTo(map);else map.removeLayer(afterLayer);window.renderHeat();};
+window.toggleCandidate=id=>{if(bridge)bridge.toggle_candidate(id);};
+</script></body></html>

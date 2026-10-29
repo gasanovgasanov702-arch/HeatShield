@@ -1,0 +1,515 @@
+{
+  "type": "FeatureCollection",
+  "name": "HeatShield recommendations",
+  "properties": {
+    "source": "OpenStreetMap",
+    "analyzed_at_utc": "2026-10-28T13:57:44.898543+00:00",
+    "limitations": "OSM coverage varies. Free geometry does not establish land ownership, utilities, soil suitability or actual vegetation. Heat and pedestrian values are relative model estimates, not measurements. The 15% canopy response is an uncalibrated scenario assumption, not a temperature prediction.",
+    "model_assumptions": {
+      "canopy_radius_m": 7.0,
+      "max_index_response_under_canopy": 0.15
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          76.89194186605648,
+          43.24044964525445
+        ]
+      },
+      "properties": {
+        "candidate_id": 143,
+        "heat_index": 0.6172771217223001,
+        "pedestrian_index": 0.8855646825843972,
+        "green_deficit_index": 1.0,
+        "buildings_distance_m": 8.6,
+        "roads_distance_m": 8.1,
+        "footways_distance_m": 160.1,
+        "green_distance_m": 178.7,
+        "trees_distance_m": 199.8,
+        "water_distance_m": 663.5,
+        "attractors_distance_m": 32.0,
+        "mapped_green_objects": 47,
+        "verification_required": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          76.8903060137669,
+          43.23534418617954
+        ]
+      },
+      "properties": {
+        "candidate_id": 115,
+        "heat_index": 0.5928921881113777,
+        "pedestrian_index": 0.8083066111434238,
+        "green_deficit_index": 1.0,
+        "buildings_distance_m": 9.9,
+        "roads_distance_m": 10.2,
+        "footways_distance_m": 5.1,
+        "green_distance_m": 229.3,
+        "trees_distance_m": 393.8,
+        "water_distance_m": 441.5,
+        "attractors_distance_m": 9.9,
+        "mapped_green_objects": 47,
+        "verification_required": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          76.88849301299463,
+          43.23645466918967
+        ]
+      },
+      "properties": {
+        "candidate_id": 84,
+        "heat_index": 0.6238350633034325,
+        "pedestrian_index": 0.7568547365301799,
+        "green_deficit_index": 0.9979552858251335,
+        "buildings_distance_m": 12.5,
+        "roads_distance_m": 11.7,
+        "footways_distance_m": 20.6,
+        "green_distance_m": 149.7,
+        "trees_distance_m": 281.8,
+        "water_distance_m": 270.4,
+        "attractors_distance_m": 20.0,
+        "mapped_green_objects": 47,
+        "verification_required": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          76.89089242571336,
+          43.24235792664034
+        ]
+      },
+      "properties": {
+        "candidate_id": 127,
+        "heat_index": 0.6223889469532765,
+        "pedestrian_index": 0.722667716977446,
+        "green_deficit_index": 1.0,
+        "buildings_distance_m": 9.6,
+        "roads_distance_m": 14.8,
+        "footways_distance_m": 116.4,
+        "green_distance_m": 155.5,
+        "trees_distance_m": 287.9,
+        "water_distance_m": 744.3,
+        "attractors_distance_m": 9.6,
+        "mapped_green_objects": 47,
+        "verification_required": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          76.88921488373883,
+          43.23590248154402
+        ]
+      },
+      "properties": {
+        "candidate_id": 100,
+        "heat_index": 0.6883771227938272,
+        "pedestrian_index": 0.5963848225131672,
+        "green_deficit_index": 1.0,
+        "buildings_distance_m": 11.4,
+        "roads_distance_m": 12.7,
+        "footways_distance_m": 4.0,
+        "green_distance_m": 233.2,
+        "trees_distance_m": 340.1,
+        "water_distance_m": 338.6,
+        "attractors_distance_m": 11.4,
+        "mapped_green_objects": 47,
+        "verification_required": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          76.8912533855399,
+          43.24208182560833
+        ]
+      },
+      "properties": {
+        "candidate_id": 133,
+        "heat_index": 0.6779046052826461,
+        "pedestrian_index": 0.5943568928864578,
+        "green_deficit_index": 1.0,
+        "buildings_distance_m": 7.1,
+        "roads_distance_m": 28.6,
+        "footways_distance_m": 142.9,
+        "green_distance_m": 168.9,
+        "trees_distance_m": 259.6,
+        "water_distance_m": 740.0,
+        "attractors_distance_m": 7.1,
+        "mapped_green_objects": 47,
+        "verification_required": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          76.89124503105252,
+          43.2418118317889
+        ]
+      },
+      "properties": {
+        "candidate_id": 132,
+        "heat_index": 0.6871219393408095,
+        "pedestrian_index": 0.5778533808662519,
+        "green_deficit_index": 1.0,
+        "buildings_distance_m": 7.8,
+        "roads_distance_m": 32.6,
+        "footways_distance_m": 139.5,
+        "green_distance_m": 161.3,
+        "trees_distance_m": 264.6,
+        "water_distance_m": 717.6,
+        "attractors_distance_m": 7.8,
+        "mapped_green_objects": 47,
+        "verification_required": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          76.89158927445308,
+          43.240995742114265
+        ]
+      },
+      "properties": {
+        "candidate_id": 139,
+        "heat_index": 0.5841421813180749,
+        "pedestrian_index": 0.6536027401087339,
+        "green_deficit_index": 1.0,
+        "buildings_distance_m": 22.5,
+        "roads_distance_m": 14.6,
+        "footways_distance_m": 160.1,
+        "green_distance_m": 180.2,
+        "trees_distance_m": 245.2,
+        "water_distance_m": 676.5,
+        "attractors_distance_m": 68.9,
+        "mapped_green_objects": 47,
+        "verification_required": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          76.8896175419499,
+          43.2369763578063
+        ]
+      },
+      "properties": {
+        "candidate_id": 106,
+        "heat_index": 0.4804365181925813,
+        "pedestrian_index": 0.7648955771125796,
+        "green_deficit_index": 0.97703582794788,
+        "buildings_distance_m": 21.0,
+        "roads_distance_m": 27.9,
+        "footways_distance_m": 14.9,
+        "green_distance_m": 146.6,
+        "trees_distance_m": 217.7,
+        "water_distance_m": 362.3,
+        "attractors_distance_m": 30.2,
+        "mapped_green_objects": 47,
+        "verification_required": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          76.88923991548786,
+          43.23671246474864
+        ]
+      },
+      "properties": {
+        "candidate_id": 101,
+        "heat_index": 0.4859083800231742,
+        "pedestrian_index": 0.7052214765346825,
+        "green_deficit_index": 1.0,
+        "buildings_distance_m": 19.0,
+        "roads_distance_m": 34.2,
+        "footways_distance_m": 35.0,
+        "green_distance_m": 168.5,
+        "trees_distance_m": 251.1,
+        "water_distance_m": 330.2,
+        "attractors_distance_m": 40.5,
+        "mapped_green_objects": 47,
+        "verification_required": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          76.89000351930488,
+          43.23751024377477
+        ]
+      },
+      "properties": {
+        "candidate_id": 111,
+        "heat_index": 0.6216017437723067,
+        "pedestrian_index": 0.8706731670275785,
+        "green_deficit_index": 0.6916796023210119,
+        "buildings_distance_m": 20.6,
+        "roads_distance_m": 8.9,
+        "footways_distance_m": 5.3,
+        "green_distance_m": 103.8,
+        "trees_distance_m": 158.0,
+        "water_distance_m": 397.3,
+        "attractors_distance_m": 48.1,
+        "mapped_green_objects": 47,
+        "verification_required": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          76.89015379650739,
+          43.24237013751893
+        ]
+      },
+      "properties": {
+        "candidate_id": 114,
+        "heat_index": 0.5888994556564774,
+        "pedestrian_index": 0.8403691249915345,
+        "green_deficit_index": 0.7316971821047406,
+        "buildings_distance_m": 23.1,
+        "roads_distance_m": 8.0,
+        "footways_distance_m": 56.7,
+        "green_distance_m": 109.8,
+        "trees_distance_m": 347.8,
+        "water_distance_m": 709.3,
+        "attractors_distance_m": 23.1,
+        "mapped_green_objects": 47,
+        "verification_required": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          76.89267211099079,
+          43.240167429587736
+        ]
+      },
+      "properties": {
+        "candidate_id": 156,
+        "heat_index": 0.5900899867598777,
+        "pedestrian_index": 0.7112516286573222,
+        "green_deficit_index": 0.8370297549191812,
+        "buildings_distance_m": 34.4,
+        "roads_distance_m": 23.4,
+        "footways_distance_m": 111.5,
+        "green_distance_m": 125.6,
+        "trees_distance_m": 195.5,
+        "water_distance_m": 698.1,
+        "attractors_distance_m": 55.9,
+        "mapped_green_objects": 47,
+        "verification_required": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          76.89159763022249,
+          43.24126573591868
+        ]
+      },
+      "properties": {
+        "candidate_id": 140,
+        "heat_index": 0.6269712743295117,
+        "pedestrian_index": 0.4839171128885806,
+        "green_deficit_index": 1.0,
+        "buildings_distance_m": 8.5,
+        "roads_distance_m": 10.6,
+        "footways_distance_m": 163.0,
+        "green_distance_m": 183.7,
+        "trees_distance_m": 256.9,
+        "water_distance_m": 696.4,
+        "attractors_distance_m": 39.1,
+        "mapped_green_objects": 47,
+        "verification_required": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          76.89271391369383,
+          43.241517397820566
+        ]
+      },
+      "properties": {
+        "candidate_id": 158,
+        "heat_index": 0.5801318588109085,
+        "pedestrian_index": 0.8323269010623688,
+        "green_deficit_index": 0.6971152665438186,
+        "buildings_distance_m": 16.1,
+        "roads_distance_m": 9.5,
+        "footways_distance_m": 87.4,
+        "green_distance_m": 104.6,
+        "trees_distance_m": 163.8,
+        "water_distance_m": 784.0,
+        "attractors_distance_m": 16.1,
+        "mapped_green_objects": 47,
+        "verification_required": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          76.89270555292175,
+          43.241247404202184
+        ]
+      },
+      "properties": {
+        "candidate_id": 157,
+        "heat_index": 0.6087063816816106,
+        "pedestrian_index": 0.7777198247665315,
+        "green_deficit_index": 0.718463554307583,
+        "buildings_distance_m": 14.8,
+        "roads_distance_m": 13.0,
+        "footways_distance_m": 90.1,
+        "green_distance_m": 107.8,
+        "trees_distance_m": 181.7,
+        "water_distance_m": 765.2,
+        "attractors_distance_m": 33.1,
+        "mapped_green_objects": 47,
+        "verification_required": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          76.89146395179014,
+          43.23694583335733
+        ]
+      },
+      "properties": {
+        "candidate_id": 135,
+        "heat_index": 0.5482863773861767,
+        "pedestrian_index": 0.5507739148899145,
+        "green_deficit_index": 1.0,
+        "buildings_distance_m": 8.4,
+        "roads_distance_m": 42.9,
+        "footways_distance_m": 50.6,
+        "green_distance_m": 155.5,
+        "trees_distance_m": 221.9,
+        "water_distance_m": 511.7,
+        "attractors_distance_m": 53.6,
+        "mapped_green_objects": 47,
+        "verification_required": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          76.8930581358019,
+          43.240701304082584
+        ]
+      },
+      "properties": {
+        "candidate_id": 164,
+        "heat_index": 0.7104540303162715,
+        "pedestrian_index": 0.7993374215251566,
+        "green_deficit_index": 0.5776407789806407,
+        "buildings_distance_m": 9.9,
+        "roads_distance_m": 9.6,
+        "footways_distance_m": 65.8,
+        "green_distance_m": 86.6,
+        "trees_distance_m": 208.3,
+        "water_distance_m": 755.0,
+        "attractors_distance_m": 63.8,
+        "mapped_green_objects": 47,
+        "verification_required": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          76.89121996828428,
+          43.241001850246064
+        ]
+      },
+      "properties": {
+        "candidate_id": 131,
+        "heat_index": 0.5029242717965535,
+        "pedestrian_index": 0.5830606465698368,
+        "green_deficit_index": 1.0,
+        "buildings_distance_m": 11.5,
+        "roads_distance_m": 36.2,
+        "footways_distance_m": 130.2,
+        "green_distance_m": 150.4,
+        "trees_distance_m": 239.4,
+        "water_distance_m": 654.0,
+        "attractors_distance_m": 64.7,
+        "mapped_green_objects": 47,
+        "verification_required": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          76.8907253882008,
+          43.236958046710996
+        ]
+      },
+      "properties": {
+        "candidate_id": 122,
+        "heat_index": 0.5220153850316027,
+        "pedestrian_index": 0.5517076052960416,
+        "green_deficit_index": 1.0,
+        "buildings_distance_m": 14.7,
+        "roads_distance_m": 50.1,
+        "footways_distance_m": 47.1,
+        "green_distance_m": 169.8,
+        "trees_distance_m": 212.9,
+        "water_distance_m": 452.0,
+        "attractors_distance_m": 63.1,
+        "mapped_green_objects": 47,
+        "verification_required": true
+      }
+    }
+  ]
+}
