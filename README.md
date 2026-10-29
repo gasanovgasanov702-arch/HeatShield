@@ -4,6 +4,8 @@
 
 ## Запуск на Windows 10/11
 
+**Если вы открыли проект на GitHub:** скачайте [HeatShield-Windows.zip из Releases](https://github.com/gasanovgasanov702-arch/HeatShield/releases/tag/v0.1.0), полностью распакуйте архив и дважды нажмите `START_HEATSHIELD.bat` внутри папки `HeatShield`. Кнопка GitHub **Code → Download ZIP** скачивает исходники без собранного EXE.
+
 **Самый простой вариант:** дважды нажмите `START_HEATSHIELD.bat` в корне проекта. Он откроет собранный `dist\HeatShield\HeatShield.exe`. Внутри папки `dist\HeatShield` лежит такой же батник: можно запускать приложение оттуда. EXE нужно оставлять вместе с соседней папкой `_internal`.
 
 Если хотите запускать именно исходники и окружение ещё не создано, дважды нажмите `SETUP_AND_RUN.bat`. Он установит зависимости через интернет и запустит `main.py`; для него нужен Python 3.11. После установки можно запускать `START_HEATSHIELD.bat`, даже если готового EXE нет.
