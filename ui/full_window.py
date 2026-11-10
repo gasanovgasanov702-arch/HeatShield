@@ -76,6 +76,21 @@ def search_city(query: str) -> tuple[float, float, str]:
     return float(results[0]["lat"]), float(results[0]["lon"]), results[0]["display_name"]
 
 
+# Возвращает небольшой отпечаток локальных GeoJSON, чтобы изменения файла во время загрузки не прошли незаметно.
+def _source_signature(filename: str) -> tuple:
+    # Пустой путь означает отсутствие пользовательского слоя и всегда имеет стабильный отпечаток.
+    if not filename:
+        return ("", 0, 0)
+    # Читаем размер и время изменения вместо загрузки файла второй раз в UI-потоке.
+    try:
+        stat = Path(filename).stat()
+        # Путь, размер и наносекундное время достаточно различают обычную правку GeoJSON.
+        return (str(Path(filename).resolve()), stat.st_size, stat.st_mtime_ns)
+    # Если файл удалили или заменили во время Worker, это должно считаться изменением входа.
+    except OSError:
+        return (str(Path(filename).resolve()), -1, -1)
+
+
 # Главное окно соединяет форму выбора, параметры плана, показатели и интерактивную карту.
 class MainWindow(QMainWindow):
     # Конструктор создаёт окно и соединяет пользовательские действия с обработчиками.
@@ -486,7 +501,7 @@ class MainWindow(QMainWindow):
         # Без выбранной области анализ невозможен; защита также нужна при вызове из кода.
         if self.bounds is None:return
         # Фиксируем полный набор входов до запуска потока, включая параметры и локальные GeoJSON.
-        self._analysis_source=(self.bounds,self.local_tree_file,self.local_restricted_file,self._settings())
+        self._analysis_source=(self.bounds,(_source_signature(self.local_tree_file),_source_signature(self.local_restricted_file)),self._settings())
         # Сбрасываем флаг старой правки, потому что сейчас начинается новый независимый запуск.
         self._settings_changed_during_analysis=False
         # Состояние нужно обработчику valueChanged, чтобы он мог предупредить пользователя во время загрузки.
@@ -537,8 +552,10 @@ class MainWindow(QMainWindow):
         self._analysis_running=False
         # Пока шла загрузка, пользователь мог изменить участок; не показываем старые данные поверх нового.
         current_source=(self.bounds,self.local_tree_file,self.local_restricted_file)
+        # Проверяем также размер/время GeoJSON, потому что путь мог остаться тем же после перезаписи файла.
+        source_changed=self._analysis_source is not None and (self._analysis_source[0]!=self.bounds or self._analysis_source[1] != (_source_signature(self.local_tree_file),_source_signature(self.local_restricted_file)))
         # Геометрия или локальные файлы меняют сами кандидаты, поэтому старый ответ здесь нельзя применять.
-        if current_source!=(analysis.bounds,*analysis.source_files):
+        if source_changed or current_source!=(analysis.bounds,*analysis.source_files):
             # Показываем сообщение на 10 секунд, так как устаревший ответ не будет применён.
             self.statusBar().showMessage("Участок или дополнительные файлы изменились во время загрузки. Старый результат отброшен.",10000)
             # Отбрасываем устаревший ответ и сообщаем, почему он не показан.
