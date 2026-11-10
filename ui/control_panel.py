@@ -2,6 +2,7 @@
 # Панель собирает параметры алгоритма из полей ввода и превращает их в Settings.
 
 # Поля SpinBox позволяют вводить числа, а форма связывает подписи с соответствующими полями.
+from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QDoubleSpinBox, QFormLayout, QGroupBox, QSpinBox, QLabel
 
 # Settings — структура параметров, которую использует оптимизатор.
@@ -10,6 +11,9 @@ from core.optimizer import Settings
 
 # Группа числовых полей, из которых пользователь собирает настройки оптимизатора.
 class ControlPanel(QGroupBox):
+    # Сигнал сообщает главному окну, что пользователь изменил настройки во время фонового расчёта.
+    settings_changed = Signal()
+
     # parent позволяет встроить панель в другое окно Qt и управляет её временем жизни.
     def __init__(self, parent=None) -> None:
         # Создаём группу с заголовком, который виден пользователю над элементами формы.
@@ -99,6 +103,11 @@ class ControlPanel(QGroupBox):
         # Подписываемся на изменения трёх полей, определяющих доступное число деревьев.
         for widget in (self.trees, self.budget, self.cost):
             widget.valueChanged.connect(self._update_capacity)
+        # Все поля также сообщают о правке, чтобы приложение не применяло устаревший план молча.
+        for widget in (self.trees, self.budget, self.cost, self.distance, self.heat,
+                       self.pedestrian, self.green, self.seed):
+            # Сигнал Qt передаёт новое число, но панели достаточно самого факта изменения.
+            widget.valueChanged.connect(lambda *_: self.settings_changed.emit())
         # Выводим подсказку сразу под параметрами.
         form.addRow("Предел плана", self.capacity)
         # Заполняем её значениями по умолчанию при создании интерфейса.

@@ -92,6 +92,12 @@ class MainWindow(QMainWindow):
         self.analysis: Analysis | None = None
         # Флаг предотвращает несколько одновременных тяжёлых пересчётов.
         self._rerun_running = False
+        # Этот флаг отличает полный сетевой анализ от быстрой повторной оптимизации.
+        self._analysis_running = False
+        # Здесь сохраняются входы, с которыми реально стартовал фоновый анализ.
+        self._analysis_source: tuple | None = None
+        # Изменение параметров во время анализа не отменяет запрос, но требует повторного плана.
+        self._settings_changed_during_analysis = False
         # Ссылка позволяет отбросить результат для уже сменившегося участка.
         self._rerun_source: Analysis | None = None
         # Берём общий пул потоков Qt, чтобы сетевые вычисления не блокировали окно.
@@ -233,6 +239,8 @@ class MainWindow(QMainWindow):
         planning_layout=tab_page("Параметры")
         # ControlPanel создаёт числовые поля оптимизатора.
         self.controls=ControlPanel();planning_layout.addWidget(self.controls)
+        # Любая правка числового поля помечается, чтобы старые настройки не применились незаметно.
+        self.controls.settings_changed.connect(self._settings_edited)
         # GoalPanel задаёт цель тени и показывает, достиг ли её текущий план.
         self.goal=GoalPanel();planning_layout.addWidget(self.goal)
         # Свободное место уходит под настройками, чтобы они не растягивались по высоте.
@@ -243,6 +251,8 @@ class MainWindow(QMainWindow):
         self._goal_timer.timeout.connect(self._rerun)
         # Изменение процента цели планирует пересчёт через таймер.
         self.goal.target.valueChanged.connect(self._schedule_goal_rerun)
+        # Цель тоже является частью Settings и должна попасть в ту же защиту от устаревших входов.
+        self.goal.target.valueChanged.connect(self._settings_edited)
 
         # Вкладка результатов показывает показатели, аудит и экспорт.
         results_layout=tab_page("Результаты")
@@ -313,12 +323,26 @@ class MainWindow(QMainWindow):
 
     # Возвращает кнопки в рабочее состояние и показывает пользователю причину сбоя.
     def _error(self,message:str)->None:
+        # Ошибка фонового анализа также освобождает его состояние, иначе UI мог бы остаться «занятым» навсегда.
+        self._analysis_running=False
         # Возвращаем кнопки в рабочее состояние после ошибки фоновой операции.
         self.analyze_button.setEnabled(self.bounds is not None);self.city_button.setEnabled(True)
         # Показываем краткий текст ошибки в строке состояния окна.
         self.statusBar().showMessage("Ошибка: "+message)
         # Диалог даёт полное сообщение и совет проверить сеть/уменьшить участок.
         QMessageBox.warning(self,"Не удалось выполнить операцию",message+"\nПроверьте интернет и попробуйте меньшую территорию.")
+
+    # Запоминает правку параметров и объясняет, как она будет применена к уже идущему расчёту.
+    def _settings_edited(self,*_args)->None:
+        # Пока анализ OSM ещё идёт, его нельзя безопасно прервать из главного потока.
+        if self._analysis_running:
+            # Запрос продолжается на исходных данных, а актуальный план будет пересчитан после загрузки.
+            self._settings_changed_during_analysis=True
+            self.statusBar().showMessage("Параметры изменены во время анализа: загрузку не прерываем, после неё автоматически пересчитаем план.",10000)
+        # При быстрой оптимизации результат тоже не теряем: _rerun_done увидит новые настройки.
+        elif self._rerun_running:
+            # Предупреждение показывает, почему цифры на экране временно относятся к старым настройкам.
+            self.statusBar().showMessage("Параметры изменены: текущий пересчёт завершится, затем будет повторён с новыми значениями.",10000)
 
     # Проверяет запрос названия и запускает фоновый поиск города.
     def _search_city(self)->None:
@@ -451,7 +475,7 @@ class MainWindow(QMainWindow):
                 # Записываем среднюю долготу прямоугольника, не запуская сигнал очистки анализа.
                 self.lon.setValue((west+east)/2)
         # Показываем источник выбора, центр, углы и примерную площадь участка.
-        self.info.setText(f"Выбран: {source}\nЦентр: {(south+north)/2:.5f}, {(west+east)/2:.5f}\nЮЗ: {south:.5f}, {west:.5f}\nСВ: {north:.5f}, {east:.5f}\nПлощадь: {area:.2f} км²")
+        self.info.setText(f"Выбран: {source}\nЦентр: {(south+north)/2:.5f}, {(west+east)/2:.5f}\nЮЗ: {south:.5f}, {west:.5f}\nСВ: {north:.5f}, {east:.5f}\nПлощадь: {area:.2f} км²\nЖёлтые углы на карте можно перетаскивать для выравнивания границ.")
         # Краткая сводка над картой напоминает площадь и следующее действие.
         self.map_summary.setText(f"Выбран участок · {area:.2f} км² · нажмите «Анализировать территорию»")
         # Разрешаем запуск только после успешной проверки границ.
@@ -461,6 +485,12 @@ class MainWindow(QMainWindow):
     def _analyze(self)->None:
         # Без выбранной области анализ невозможен; защита также нужна при вызове из кода.
         if self.bounds is None:return
+        # Фиксируем полный набор входов до запуска потока, включая параметры и локальные GeoJSON.
+        self._analysis_source=(self.bounds,self.local_tree_file,self.local_restricted_file,self._settings())
+        # Сбрасываем флаг старой правки, потому что сейчас начинается новый независимый запуск.
+        self._settings_changed_during_analysis=False
+        # Состояние нужно обработчику valueChanged, чтобы он мог предупредить пользователя во время загрузки.
+        self._analysis_running=True
         # Блокируем повторный старт той же операции и показываем статус ожидания.
         self.analyze_button.setEnabled(False)
         # Показываем, что сейчас загружаются данные и выполняется геометрический расчёт.
@@ -503,8 +533,12 @@ class MainWindow(QMainWindow):
 
     # Применяет ответ фонового анализа только если выбранные границы за это время не изменились.
     def _analysis_done(self,analysis:Analysis)->None:
+        # Полный фоновый Worker завершился независимо от того, примем мы его результат или отбросим.
+        self._analysis_running=False
         # Пока шла загрузка, пользователь мог изменить участок; не показываем старые данные поверх нового.
-        if self.bounds!=analysis.bounds or (self.local_tree_file,self.local_restricted_file)!=analysis.source_files:
+        current_source=(self.bounds,self.local_tree_file,self.local_restricted_file)
+        # Геометрия или локальные файлы меняют сами кандидаты, поэтому старый ответ здесь нельзя применять.
+        if current_source!=(analysis.bounds,*analysis.source_files):
             # Показываем сообщение на 10 секунд, так как устаревший ответ не будет применён.
             self.statusBar().showMessage("Участок или дополнительные файлы изменились во время загрузки. Старый результат отброшен.",10000)
             # Отбрасываем устаревший ответ и сообщаем, почему он не показан.
@@ -519,7 +553,15 @@ class MainWindow(QMainWindow):
         # Открываем вкладку метрик, чтобы результат был виден сразу после завершения.
         self.tabs.setCurrentIndex(2)
         # Уточняем число геометрически построенных точек и необходимость проверки на месте.
-        self.statusBar().showMessage(f"Готово: {len(analysis.candidates)} геометрических кандидатов. Точки требуют проверки на месте.")
+        # Если поля менялись в дороге, показываем старые кандидаты только как промежуточный результат.
+        if self._settings_changed_during_analysis or self._settings()!=analysis.settings:
+            # Входные геоданные уже пригодны, поэтому повторяем только оптимизацию с последними параметрами.
+            self.statusBar().showMessage("Данные карты готовы, но параметры менялись во время анализа. Пересчитываем итоговый план…",10000)
+            # QTimer не вызывает Worker прямо из сигнала WebEngine и даёт Qt завершить текущую обработку.
+            QTimer.singleShot(0,self._rerun)
+        else:
+            # При неизменных входах результат сразу считается окончательным для данного запуска.
+            self.statusBar().showMessage(f"Готово: {len(analysis.candidates)} геометрических кандидатов. Точки требуют проверки на месте.")
 
     # Передаёт текущие кандидаты/план карте и обновляет все панели результата.
     def _show_analysis(self)->None:
@@ -578,6 +620,8 @@ class MainWindow(QMainWindow):
         # Если настройки успели поменяться, считаем план заново с последними значениями.
         if self._settings()!=result.settings:
             # Повторный запуск идёт после завершения предыдущего Worker.
+            # Пользователь видит явное предупреждение, а не промежуточные числа без объяснения.
+            self.statusBar().showMessage("Параметры изменились во время расчёта — запускаем ещё один пересчёт с актуальными значениями.",10000)
             self._rerun()
             return
         # Сохраняем итоговый план как текущий.

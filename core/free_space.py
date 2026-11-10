@@ -52,6 +52,10 @@ def _shapes(frame: gpd.GeoDataFrame, buffer: float = 0) -> list:
 # Исключаем препятствия и размещаем сетку возможных мест внутри оставшейся территории.
 def find_free_space(city: CityData, layers: dict[str, gpd.GeoDataFrame], *, spacing_m: int = 30, max_candidates: int = 1800) -> tuple[object, list[Candidate]]:
     # Собираем расширенные контуры объектов, чтобы точка не оказалась вплотную к ним.
+    # Проверяем шаг и лимит до создания сетки: нулевой шаг иначе зациклит arange и повесит приложение.
+    if spacing_m <= 0 or max_candidates <= 0:
+        # Невалидные параметры — это ошибка вызывающего кода, а не причина возвращать случайный результат.
+        raise ValueError("Шаг сетки и лимит кандидатов должны быть положительными.")
     obstacles = []
     # Для каждого слоя задан защитный отступ в метрах; зелёные зоны считаются занятыми целиком.
     for name, distance in (("buildings", 5), ("roads", 5), ("footways", 2), ("sidewalks", 8), ("green", 0), ("water", 5), ("trees", 5), ("restricted", 5), ("attractors", 2)):

@@ -50,7 +50,15 @@ def ready():
         print("default layers quiet",repr(state),flush=True)
     # Читаем видимость зданий/дорог/зелени/воды, кандидатов, теплового слоя и слоя после посадки.
     window.map.page().runJavaScript("JSON.stringify(['buildings','roads','green','water'].map(k=>map.hasLayer(osmLayers[k])).concat([map.hasLayer(candidateLayer),map.hasLayer(heatLayer),map.hasLayer(afterLayer)]))",layer_state)
-    # После получения двух ответов завершаем проверку через 1 секунду.
+    # Проверяем, что выбранный участок теперь имеет четыре редактируемых жёлтых угла.
+    def corner_state(value):
+        # Сохраняем число ручек, чтобы тест не ограничивался только визуальным снимком.
+        checks["corners"]=value
+        # Печатаем состояние редактора участка для короткого отчёта smoke-прогона.
+        print("editable corners",value,flush=True)
+    # Команда воспроизводит обычное отображение участка после выбора по координатам.
+    window.map.page().runJavaScript("window.focusBounds([43.237,76.887,43.240,76.891]); cornerLayer.getLayers().length",corner_state)
+    # После получения трёх ответов завершаем проверку через 1 секунду.
     QTimer.singleShot(1000,app.quit)
 # Запускаем ready после сигнала карты, чтобы JavaScript API уже был доступен.
 window.map.bridge.map_ready.connect(ready)
@@ -60,4 +68,4 @@ QTimer.singleShot(15000, app.quit)
 app.exec()
 # Ожидается, что drag включён, кандидаты видимы во время перетаскивания и скрываются после него.
 # Вторая строка состояния подтверждает начальную видимость четырёх базовых слоёв и скрытое состояние остальных.
-assert checks=={"drag":"[true,true,false]","layers":"[true,false,true,true,false,false,true]"},checks
+assert checks=={"drag":"[true,true,false]","layers":"[true,false,true,true,false,false,true]","corners":4},checks
