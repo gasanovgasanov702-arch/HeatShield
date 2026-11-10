@@ -1,6 +1,11 @@
 @echo off
 setlocal
-rem This file opens the ready-to-use build first.
+rem Prefer the latest v0.2.0 build so an older EXE in dist\HeatShield cannot be opened accidentally.
+if exist "%~dp0dist\HeatShield-v0.2.0\HeatShield\HeatShield.exe" (
+    start "" "%~dp0dist\HeatShield-v0.2.0\HeatShield\HeatShield.exe"
+    exit /b 0
+)
+rem Keep the previous build as a fallback when the new release folder is not unpacked yet.
 if exist "%~dp0dist\HeatShield\HeatShield.exe" (
     start "" "%~dp0dist\HeatShield\HeatShield.exe"
     exit /b 0
